@@ -1,0 +1,171 @@
+#-------------------------------------------------------------------------------
+# Name:        module1
+# Purpose:
+#
+# Author:      Flo
+#
+# Created:     21/08/2015
+# Copyright:   (c) Flo 2015
+# Licence:     <your licence>
+#-------------------------------------------------------------------------------
+#!/usr/bin/env python
+
+#import GUI library
+from tkinter import *
+
+#for Python V3 you must explicitely load the messagebox
+import tkinter.messagebox
+
+#create the book class incorporating instance variables and methods
+class Image:
+    def __init__(self, title, owner, imgid, imglicense, name, extension):
+        self.title = title
+        self.owner= owner
+        self.imgid= imgid
+        self.type= 'Image'
+        self.license= imglicense
+        self.name= name
+        self.extension= extension
+
+#These functions return the specific items of the Image class. I use these later on when I write them to csv, because I cannot use the 'self' bit of code.
+    def get_title(self):
+        return self.title
+
+    def get_owner(self):
+        return self.owner
+
+    def get_type(self):
+        return self.type
+
+    def get_imgid(self):
+        return self.imgid
+
+    def get_imglicense(self):
+        return self.license
+
+    def get_name(self):
+        return self.name
+
+    def get_extension(self):
+        return self.extension
+
+
+
+#create the GUI interface
+class GUI:
+
+    def __init__(self):
+
+        # similar to root in other texts
+        window = Tk()
+        window.title("Image Metadata Entry")
+        #setting root window and size
+        window.configure(width=250, height=200, background= '#F88965')
+
+        #INITIALIZATION VARIABLES
+        #this variable stores whether the data has been validated or not
+        self.ready_to_write = False
+        #this will contain the list of all books entered via the gui
+        self.recordlist = []
+
+        #Image Title
+        title_label = Label(window, text='Enter image title:')
+        title_label.grid(row = 1, column = 1)
+        self.title_field = Entry(window)
+        self.title_field.grid(row = 2, column = 1)
+        title_label.configure(bg='#F88965')
+
+        #Image File Name
+        name_label = Label(window, text='Enter image file name:')
+        name_label.grid(row = 3, column = 1)
+        self.name_field = Entry(window)
+        self.name_field.grid(row = 4, column = 1)
+        name_label.configure(bg='#F88965')
+
+        #Owner
+        owner_label = Label(window, text='Enter owner:')
+        owner_label.grid(row = 5, column = 1)
+        self.owner_field = Entry(window)
+        self.owner_field.grid(row = 6, column = 1)
+        owner_label.configure(bg='#F88965')
+
+        #Image ID
+        imgid_label = Label(window, text='Enter image ID:')
+        imgid_label.grid(row = 7, column = 1)
+        self.imgid_field = Entry(window)
+        self.imgid_field.grid(row = 8, column = 1)
+        imgid_label.configure(bg='#F88965')
+
+        license_label = Label(window, text='Enter license type:')
+        self.licensemenu= StringVar(window)
+        self.licensemenu.set("CC0") # default value
+        license_field = OptionMenu(window, self.licensemenu, "CC0", "BY", "BY-NC", "BY-SA", "BY-ND", "BY-NC-SA", "BY-NC-ND")
+        license_label.grid(row = 1, column = 2)
+        license_field.grid(row = 2, column = 2)
+        license_label.configure(bg='#F88965')
+        license_field.configure(bg='#ADD27A', relief ='ridge', highlightthickness= 0)
+
+        #Image Extension
+        extension_label = Label(window, text='Enter extension:')
+        self.extmenu= StringVar(window)
+        self.extmenu.set(".jpeg") # default value
+        extension_field = OptionMenu(window, self.extmenu, ".jpeg", ".png", ".gif", ".bmp")
+        extension_label.grid(row = 3, column = 2)
+        extension_field.grid(row = 4, column = 2)
+        extension_label.configure(bg='#F88965')
+        extension_field.configure(bg='#ADD27A', relief ='ridge', highlightthickness= 0)
+
+        #buttons
+        button = Button(window, text='Press to Validate', command=self.doSubmit)
+        button.grid(row = 7, column = 2)
+        button.configure(bg='#ADD27A', highlightthickness= 0, relief ='ridge')
+
+        button1 = Button(window, text='Write To CSV', command=self.writetocsv)
+        button1.grid(row = 8, column = 2)
+        button1.configure(bg='#ADD27A', highlightthickness= 0, relief ='ridge')
+
+        #waiting for user input - event driven program
+        window.mainloop()
+
+
+    def doSubmit(self):
+        #this is the callback method for the 'Submit' button
+        if len(self.title_field.get()) <1 or len(self.owner_field.get()) <1 or len(self.imgid_field.get()) <1 or len(self.licensemenu.get()) <1 or len(self.name_field.get()) <1:
+            tkinter.messagebox.showwarning('Warning!','Please enter a value for all fields')
+        elif len(self.imgid_field.get()) != 6:
+            tkinter.messagebox.showwarning('Warning!','Image ID must be six digits long')
+        else:
+            try:
+                validated_imgid = int(self.imgid_field.get())
+                self.recordlist.append(Image(self.title_field.get(),self.owner_field.get(), self.imgid_field.get(), self.licensemenu.get(), self.name_field.get(), self.extmenu.get()))
+                self.ready_to_write= True
+                tkinter.messagebox.showinfo('Notice','Submission Sucessful')
+
+            except:
+                tkinter.messagebox.showwarning('Warning!','Please enter numeric image ID')
+                print('Please enter numeric image ID')
+
+
+    def writetocsv(self):
+        #this is the callback method for the 'write to csv' button
+        import csv
+        file_name = 'images.csv'
+
+        if self.ready_to_write: #checks data has been previously validated
+            ofile = open('D:/Portable Python 3.2.1.1/App/'+file_name, 'a') #open with write('w') or append('a') privelages
+            writer = csv.writer(ofile, delimiter=',', lineterminator = '\n')
+            #cycles through list of records created by gui
+            for record in self.recordlist:
+                print(record.get_title())
+                writer.writerow([record.get_title(),record.get_owner(), record.get_imgid(), record.get_imglicense(), record.get_name(), record.get_extension()])
+            #explicitly closes the output file
+            ofile.close()
+        else:
+            tkinter.messagebox.showwarning('Error!', 'You need to Validate your data')
+
+        self.ready_to_write= False
+        tkinter.messagebox.showinfo('Notice',file_name+' File Generated Sucessfully')
+
+
+#initialises the programme
+GUI()
