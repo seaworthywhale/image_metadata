@@ -152,7 +152,7 @@ class GUI:
         file_name = 'images.csv'
 
         if self.ready_to_write: #checks data has been previously validated
-            ofile = open('D:/Portable Python 3.2.1.1/App/'+file_name, 'a') #open with write('w') or append('a') privelages
+            ofile = open(file_name, 'a') #open with write('w') or append('a') privelages
             writer = csv.writer(ofile, delimiter=',', lineterminator = '\n')
             #cycles through list of records created by gui
             for record in self.recordlist:
